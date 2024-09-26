@@ -1,6 +1,8 @@
 ###This code (up to the feedforward neural network section) was made in collaboration with Guillermo Mazzilli, Carina Shanahan, and Can Goral 
 #this is our final project for our Data Mining class, a core class in the Master's in Data Science program at Embry-Riddle. 
 
+                                                          #MEANING OF VARIABLES#
+
 #Setup
 # Import packages
 import numpy as np
@@ -80,5 +82,44 @@ plt.show()
 #dist_min
 #per_y
 #ad
+
+#splitting the dataset + more visualizations 
+# Split the dataset into features (X) and target variable (y)
+X = df.drop(columns=['PHA'])  # Features
+y = df['PHA']  # Target variable
+
+X.shape
+
+list(X.columns)
+
+# Show feature distribution
+# create a box and whisker plot of each numerical attribute
+fig = plt.figure(figsize = (7,7))
+plt.boxplot(X, labels = list(X.columns))
+plt.xticks(rotation=45)
+plt.show()
+
+# Split the dataset into training and testing subsets with stratified sampling
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, stratify=y, random_state=42)
+
+# Print the proportions of classes in the training and testing subsets
+print("Proportions of classes in the training subset:")
+print(y_train.value_counts(normalize=True) * 100)
+print("\nProportions of classes in the testing subset:")
+print(y_test.value_counts(normalize=True) * 100)
+
+from sklearn.preprocessing import StandardScaler
+
+# Standardize features
+bleh = StandardScaler().fit(X)
+
+# Show feature distribution
+# create a box and whisker plot of each numerical attribute
+fig = plt.figure(figsize = (7,7))
+plt.boxplot(bleh.transform(X), labels = list(X.columns))
+plt.xticks(rotation=45)
+plt.show()
+
+
 
 
