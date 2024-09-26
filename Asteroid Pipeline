@@ -120,6 +120,136 @@ plt.boxplot(bleh.transform(X), labels = list(X.columns))
 plt.xticks(rotation=45)
 plt.show()
 
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC # added by Carina
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import cohen_kappa_score #added by Austin
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+# -----------------------------------------------------------------------------#
+# Create a pipeline for Logistic Regression
+pipeline_lr = Pipeline([
+    #('scaler', StandardScaler()),  # Standardize features
+    ('clf', LogisticRegression())  # Logistic Regression model
+])
+
+# Define hyperparameters grid for Logistic Regression
+param_grid_lr = {
+    'clf__C': [0.001, 0.01, 0.1, 1, 10, 100],  # Regularization parameter
+    'clf__solver': ['liblinear', 'saga']  # Solver for optimization
+}
+
+# -----------------------------------------------------------------------------#
+# Create a pipeline for Decision Tree
+pipeline_dt = Pipeline([
+    #('scaler', StandardScaler()),  # Standardize features
+    ('clf', DecisionTreeClassifier())  # Decision Tree model
+])
+
+# Define hyperparameters grid for Decision Tree
+param_grid_dt = {
+    'clf__max_depth': [10,20,25],  # Maximum depth of the tree
+    'clf__min_samples_split': [2,4,6,8,10],  # Minimum number of samples required to split a node
+    'clf__min_samples_leaf': [2,4,6,8,10]  # Minimum number of samples required at each leaf node
+}
+
+# -----------------------------------------------------------------------------#
+# Create a pipeline for Naive Bayes
+pipeline_nb = Pipeline([
+    #('scaler', StandardScaler()),  # Standardize features
+    ('clf', GaussianNB())  # Naive Bayes model
+])
+
+# No hyperparameters to tune for Naive Bayes
+
+# -----------------------------------------------------------------------------#
+
+# SVC Model Removed from Pipeline for Manual Tuning
+
+# -----------------------------------------------------------------------------#
+# Create a pipeline for KNN
+pipeline_knn = Pipeline([
+    #('scaler', StandardScaler()),  # Standardize features
+    ('clf', KNeighborsClassifier())  # knn model
+])
+# Define hyperparameters grid for KNN
+param_grid_knn = {
+    'clf__n_neighbors': [2,4,6,8,10], # Number of neighbors
+    'clf__weights': [None, 'uniform','distance'] # Weights to try
+}
+
+# Create GridSearchCV objects for each model
+grid_search_lr = GridSearchCV(pipeline_lr, param_grid_lr, cv=3, n_jobs=-1)
+grid_search_dt = GridSearchCV(pipeline_dt, param_grid_dt, cv=3, n_jobs=-1)
+grid_search_nb = GridSearchCV(pipeline_nb, {}, cv=3, n_jobs=-1)  # No hyperparameters for Naive Bayes
+grid_search_knn = GridSearchCV(pipeline_knn, param_grid_knn, cv = 3, n_jobs=-1)
+
+# List of models for iteration
+models = [
+    ('Naive Bayes', grid_search_nb),
+    ('Logistic Regression', grid_search_lr),
+    ('Decision Tree', grid_search_dt),
+    ('K Nearest Neighbors', grid_search_knn)
+]
+
+                                                 ###EVALUATION###
+# Train and evaluate each model using GridSearchCV
+for name, model in models:
+    print(f"Evaluating {name}...")
+    model.fit(X_train, y_train)
+    print("Best parameters:", model.best_params_)
+    print("Train accuracy:", model.best_score_ * 100)
+    print("Test accuracy:", model.score(X_test, y_test) * 100)
+    print("Kappa Score :\n", cohen_kappa_score(y_test,model.predict(X_test)))
+    print("AUC :\n", roc_auc_score(y_test,model.predict(X_test)))
+    print("Precision Rate :\n", precision_score(y_test,model.predict(X_test)))
+    print("Recall Rate :\n", recall_score(y_test,model.predict(X_test)))
+    print("F-Score :\n", f1_score(y_test,model.predict(X_test)))
+    print("Classification Report :\n", classification_report(y_test,model.predict(X_test)))
+    print()
+
+#The SVM Was Manually Tuned Outside the Pipeline
+from sklearn.linear_model import SGDClassifier
+svm_class_weights = {0: 1, 1: 8.283}
+svm_clf = SGDClassifier(random_state=42, loss='hinge', penalty='l1', class_weight=svm_class_weights)
+
+# Fit the classifier to the training data
+svm_clf.fit(X_train, y_train)
+
+# Predict the labels for the test data
+y_ptrain_svm = svm_clf.predict(X_train)
+y_pred_svm = svm_clf.predict(X_test)
+
+# Evaluate the Model
+svm_train = accuracy_score(y_train,y_ptrain_svm)
+svm_accuracy = accuracy_score(y_test, y_pred_svm)
+svm_precision = precision_score(y_test, y_pred_svm)
+svm_recall = recall_score(y_test,y_pred_svm)
+svm_f1 = f1_score(y_test, y_pred_svm)
+
+#Display the results
+print("Train Accuracy:",svm_train)
+print("Test Accuracy:", svm_accuracy)
+print("Precision:", svm_precision)
+print("Recall:", svm_recall)
+print("F1 Score:", svm_f1)
+print("Kappa Score :\n", cohen_kappa_score(y_test,y_pred_svm))
+print("AUC :\n", roc_auc_score(y_test,y_pred_svm))
+print(classification_report(y_test, y_pred_svm))
+
+# Get the Decision Tree's depth
+max_depth = grid_search_dt.best_params_['clf__max_depth']
+
+# Print the depth
+print(f"Model depth: {max_depth}")
+
+
 
 
 
