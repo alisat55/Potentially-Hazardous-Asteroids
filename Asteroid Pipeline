@@ -1,0 +1,84 @@
+###This code (up to the feedforward neural network section) was made in collaboration with Guillermo Mazzilli, Carina Shanahan, and Can Goral 
+#this is our final project for our Data Mining class, a core class in the Master's in Data Science program at Embry-Riddle. 
+
+#Setup
+# Import packages
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator, TransformerMixin
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+
+# Read the merged_data.csv file from a public shared link
+
+url = 'https://drive.google.com/file/d/12bXJAS5gN2gw0HNmY5Lf7AFusna27siC/view?usp=sharing'
+url = 'https://drive.google.com/uc?id=' + url.split('/')[-2]
+df = pd.read_csv(url)
+
+# Show the dimensions of the dataset
+df.shape
+
+# Check if dataset is balanced or unbalanced
+
+# Calculate the total number of records
+total_records = len(df)
+
+# Calculate the percentage of records for each class
+percentage_Y = (df['pha'].value_counts()['Y'] / total_records) * 100
+percentage_N = (df['pha'].value_counts()['N'] / total_records) * 100
+
+# Print the percentages
+print(f"Percentage of records with class 'Y': {percentage_Y:.2f}%")
+print(f"Percentage of records with class 'N': {percentage_N:.2f}%")
+
+# Check for NaN's
+
+print(df.isnull().sum())
+
+# Drop nan rows since there are very very few
+df.dropna(inplace=True)
+df.shape
+
+#display the first five rows of the "tidy" dataset
+df.head()
+
+#display the data types
+df.dtypes
+
+df.drop(columns=['full_name','designation','des','orbit_id', 'h', 'number'], inplace=True)
+df.head()
+
+#Defining the classes
+#Is a PHA = 1; Not a PHA = 0
+df['PHA'] = df['pha'].map({'Y': 1, 'N': 0})
+df.drop(columns='pha',inplace=True)
+df.head()
+                                                           ##INITIAL VISUALIZATIONS##
+#Correlation between features
+correlation_matrix = df.corr()
+
+mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+
+plt.figure(figsize = (10,8))
+plt.rcParams.update({'font.size': 10})
+sns.heatmap(correlation_matrix, cmap = "PiYG", vmin = -1, vmax = 1, center = 0, annot = True, fmt = '.2f', linewidths = .5, mask = mask)
+plt.show()
+                                                             ##SOME INTERESTING TRENDS:##
+#The headmap above shows that the following pairs of attributes are highly correlated:
+#v_rel with v_inf
+#v_rel with e
+#v_inf with e
+#dist with dist_min
+#dist with dist_max
+#a with ad
+
+#Due to the strong correlation between these and other attributes, and the relatively low correlation between these and the class labels, we will drop
+#v_inf
+#dist
+#dist_min
+#per_y
+#ad
+
+
