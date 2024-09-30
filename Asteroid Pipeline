@@ -1,6 +1,7 @@
 ###This code (up to the feedforward neural network section) was made in collaboration with Guillermo Mazzilli, Carina Shanahan, and Can Goral 
 #this is our final project for our Data Mining class, a core class in the Master's in Data Science program at Embry-Riddle. 
-
+#The feedforward neural network was my addition, and this research was sponsored by the NSF. 
+#I presented this research at the Aviation & Data Analytics Conference in July 2024. 
 
 #Setup
 # Import packages
